@@ -5,9 +5,13 @@ Application web de messagerie en temps réel avec gestion de salons, channels, r
 ✨ Fonctionnalités
 
 🏠 Salons — création, suppression, gestion par le créateur
+
 📢 Channels — plusieurs canaux de discussion par salon
+
 💬 Messages en temps réel — envoi de texte et de fichiers
+
 👤 Authentification — inscription, connexion, déconnexion
+
 🛡️ Rôles — administrateur, modérateur, membre
 🚫 Bannissements — les admins peuvent bannir des utilisateurs
 📁 Partage de fichiers — envoi de fichiers dans les messages
