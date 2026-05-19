@@ -1,0 +1,273 @@
+{% extends 'chat/base.html' %}
+
+{% block content %}
+<div class="row mt-4">
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">{{ salon.nom }}</h6>
+        <div class="mb-3">
+          <a href="{% url 'channel_create' salon.slug %}" class="btn btn-sm btn-outline-primary w-100">+ Nouveau Canal</a>
+        </div>
+        <div class="list-group list-group-flush">
+          {% for channel in salon.channels.all %}
+            <div class="d-flex justify-content-between align-items-center">
+              <a href="{% url 'channel' salon.slug channel.slug %}" class="list-group-item list-group-item-action py-2 px-3 flex-grow-1">
+                # {{ channel.nom }}
+              </a>
+              <a href="{% url 'channel_delete' salon.slug channel.slug %}" class="btn btn-sm btn-outline-danger ms-1" 
+                 onclick="return confirm('Êtes-vous sûr de vouloir supprimer le canal «{{ channel.nom }}» ? Cette action est irréversible.')"
+                 title="Supprimer le canal">
+                <i class="fas fa-trash"></i>
+              </a>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-9">
+    <div class="card h-100 border-0 shadow-sm">
+      <div class="card-body d-flex flex-column" style="height:70vh">
+        <div class="mb-3 d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"># {{ salon.nom }}</h5>
+          <div class="d-flex align-items-center gap-2">
+            <small class="text-muted">{{ salon.description|default:"Pas de description." }}</small>
+            {% if user.is_authenticated %}
+            <button id="moderationBtn" class="btn btn-sm btn-outline-warning" title="Modération">
+              <i class="fas fa-shield-alt"></i>
+            </button>
+            {% endif %}
+            {% if user.is_authenticated and salon.createur == user %}
+            <a href="{% url 'salon_delete' salon.slug %}" class="btn btn-sm btn-outline-danger" 
+               onclick="return confirm('Êtes-vous sûr de vouloir supprimer le salon «{{ salon.nom }}» ? Cette action est irréversible.')"
+               title="Supprimer le salon">
+              <i class="fas fa-trash"></i>
+            </a>
+            {% endif %}
+          </div>
+        </div>
+
+        <div id="messages" class="flex-grow-1 overflow-auto border rounded p-3 mb-3" data-slug="{{ slug }}">
+          <!-- Messages will be loaded dynamically by JavaScript -->
+          <div class="alert alert-info">Test: Si vous voyez ce message, le template se charge.</div>
+          <button onclick="alert('HTML button works!')" class="btn btn-primary mb-2">Test HTML</button>
+        </div>
+
+        <form id="sendForm" class="d-flex flex-column" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="d-flex mb-2">
+            <input id="messageInput" name="contenu" class="form-control me-2" placeholder="Écrire un message..." autocomplete="off">
+            <input type="file" id="fileInput" name="fichier" class="d-none" accept="image/*,.pdf,.doc,.docx,.txt">
+            <button type="button" id="fileBtn" class="btn btn-outline-secondary me-2" title="Joindre un fichier">
+              <i class="fas fa-paperclip"></i>
+            </button>
+            <button type="button" id="emojiBtn" class="btn btn-outline-secondary me-2" title="Choisir un emoji">
+              😀
+            </button>
+            <button class="btn btn-primary" type="submit">Envoyer</button>
+          </div>
+          <div id="filePreview" class="mb-2" style="display: none;"></div>
+        </form>
+
+        <!-- Emoji Picker -->
+        <div id="emojiPicker" class="border rounded p-2 mt-2" style="display: none; max-height: 200px; overflow-y: auto; background: white;">
+          <div class="d-flex flex-wrap gap-1">
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😀">😀</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😂">😂</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😊">😊</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😍">😍</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🥰">🥰</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😘">😘</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😉">😉</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😎">😎</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤔">🤔</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😮">😮</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😢">😢</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😭">😭</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😤">😤</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😡">😡</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🥺">🥺</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😴">😴</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤤">🤤</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤗">🤗</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤭">🤭</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤫">🤫</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤥">🤥</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😐">😐</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😑">😑</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😶">😶</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🙄">🙄</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😏">😏</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😣">😣</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😥">😥</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😮">😮</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤐">🤐</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😯">😯</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😪">😪</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😫">😫</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😴">😴</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😌">😌</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😛">😛</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😜">😜</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😝">😝</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤤">🤤</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😒">😒</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😓">😓</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😔">😔</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😕">😕</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🙃">🙃</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤑">🤑</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😲">😲</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="☹️">☹️</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🙁">🙁</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😖">😖</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😞">😞</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😟">😟</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😤">😤</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😢">😢</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😭">😭</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😦">😦</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😧">😧</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😨">😨</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😩">😩</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤯">🤯</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😬">😬</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😰">😰</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😱">😱</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🥵">🥵</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🥶">🥶</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😳">😳</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤪">🤪</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😵">😵</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😡">😡</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😠">😠</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤬">🤬</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😷">😷</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤒">🤒</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤕">🤕</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤢">🤢</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤮">🤮</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤧">🤧</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😇">😇</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🥳">🥳</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🥴">🥴</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😺">😺</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😸">😸</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😹">😹</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😻">😻</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😼">😼</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😽">😽</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🙀">🙀</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😿">😿</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="😾">😾</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="👍">👍</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="👎">👎</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="👌">👌</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="✌️">✌️</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤞">🤞</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤟">🤟</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤘">🤘</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤙">🤙</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="👈">👈</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="👉">👉</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="👆">👆</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🖕">🖕</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="👋">👋</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤚">🤚</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🖐️">🖐️</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="✋">✋</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🖖">🖖</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="👏">👏</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🙌">🙌</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤲">🤲</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🤝">🤝</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🙏">🙏</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="💪">💪</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🦾">🦾</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🦿">🦿</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🦵">🦵</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🦶">🦶</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="👂">👂</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🦻">🦻</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="👃">👃</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🧠">🧠</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🫀">🫀</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🫁">🫁</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🦷">🦷</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🦴">🦴</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="👀">👀</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="👁️">👁️</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="👅">👅</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="👄">👄</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="💋">💋</button>
+            <button class="btn btn-sm btn-light emoji-option" data-emoji="🩸">🩸</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Moderation Panel -->
+  <div id="moderationPanel" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Modération - {{ salon.nom }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6">
+              <h6>Utilisateurs</h6>
+              <div id="usersList" class="list-group" style="max-height: 300px; overflow-y: auto;">
+                <!-- Users will be loaded here -->
+              </div>
+            </div>
+            <div class="col-md-6">
+              <h6>Actions</h6>
+              <div id="userActions" style="display: none;">
+                <p><strong>Utilisateur sélectionné:</strong> <span id="selectedUser"></span></p>
+                <div class="btn-group-vertical w-100">
+                  <button id="banBtn" class="btn btn-danger btn-sm">Bannir</button>
+                  <button id="unbanBtn" class="btn btn-success btn-sm" style="display: none;">Débannir</button>
+                  {% if user.is_authenticated %}
+                  <button id="promoteBtn" class="btn btn-warning btn-sm">Promouvoir Modérateur</button>
+                  <button id="demoteBtn" class="btn btn-secondary btn-sm" style="display: none;">Rétrograder</button>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // expose slug for the JS loader
+  window.CHAT_SLUG = "{{ slug }}";
+  {% if user.is_authenticated %}
+  window.CURRENT_USER = "{{ user.username }}";
+  {% else %}
+  window.CURRENT_USER = null;
+  {% endif %}
+  
+  // Test script
+  console.log('Test script loaded');
+  console.log('CHAT_SLUG:', window.CHAT_SLUG);
+  console.log('CURRENT_USER:', window.CURRENT_USER);
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOMContentLoaded fired');
+    const messagesEl = document.getElementById('messages');
+    console.log('messagesEl found:', !!messagesEl);
+    
+    if (messagesEl) {
+      messagesEl.innerHTML += '<div class="alert alert-success">JavaScript DOMContentLoaded fonctionne !</div>';
+    }
+  });
+</script>
+
+{% endblock %}

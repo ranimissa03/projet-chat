@@ -1,0 +1,36 @@
+{% extends 'chat/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+  <div class="col-md-6">
+    <div class="card shadow border-0">
+      <div class="card-body p-4">
+        <h4 class="fw-bold mb-3 text-danger">Supprimer le salon</h4>
+
+        <div class="alert alert-danger">
+          <strong>Attention !</strong> Vous êtes sur le point de supprimer le salon <strong>"{{ salon.nom }}"</strong>.
+          <br><br>
+          Cette action est <strong>irréversible</strong> et supprimera également tous les canaux et messages de ce salon.
+        </div>
+
+        <div class="mb-3">
+          <strong>Salon :</strong> {{ salon.nom }}<br>
+          <strong>Description :</strong> {{ salon.description|default:"Aucune description" }}<br>
+          <strong>Canaux :</strong> {{ salon.channels.count }}<br>
+          <strong>Messages :</strong> {{ salon.messages.count }}
+        </div>
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          <div class="d-flex gap-2">
+            <button class="btn btn-danger" type="submit">Supprimer définitivement</button>
+            <a href="{% url 'room' salon.slug %}" class="btn btn-outline-secondary">Annuler</a>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

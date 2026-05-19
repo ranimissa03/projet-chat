@@ -1,0 +1,35 @@
+{% extends 'chat/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+  <div class="col-md-6">
+    <div class="card shadow border-0">
+      <div class="card-body p-4">
+        <h4 class="fw-bold mb-3 text-danger">Supprimer le canal</h4>
+
+        <div class="alert alert-warning">
+          <strong>Attention !</strong> Vous êtes sur le point de supprimer le canal <strong>"{{ channel.nom }}"</strong> du salon <strong>"{{ salon.nom }}"</strong>.
+          <br><br>
+          Cette action est <strong>irréversible</strong> et supprimera également tous les messages de ce canal.
+        </div>
+
+        <div class="mb-3">
+          <strong>Canal :</strong> #{{ channel.nom }}<br>
+          <strong>Description :</strong> {{ channel.description|default:"Aucune description" }}<br>
+          <strong>Salon :</strong> {{ salon.nom }}
+        </div>
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          <div class="d-flex gap-2">
+            <button class="btn btn-danger" type="submit">Supprimer définitivement</button>
+            <a href="{% url 'channel' salon.slug channel.slug %}" class="btn btn-outline-secondary">Annuler</a>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,236 @@
+\documentclass[12pt,a4paper]{article}
+
+% ---------- Encodage / Langue ----------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+
+% ---------- Mise en page ----------
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\usepackage{setspace}
+\onehalfspacing
+
+% ---------- Liens / PDF ----------
+\usepackage[hidelinks]{hyperref}
+
+% ---------- Images ----------
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subcaption}
+
+% ---------- Tables / Listes ----------
+\usepackage{booktabs}
+\usepackage{enumitem}
+
+% ---------- Code (optionnel) ----------
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny,
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  stringstyle=\color{teal}
+}
+
+% ---------- Titre ----------
+\title{\textbf{Rapport du projet Chat}\\
+\large Application de discussion en ligne avec Django}
+\author{
+Ben Issa Ranim \\
+DIOUF Aminta \\
+FRANCOIS-BATTAGLIA Enzo
+}
+\date{\today}
+
+\begin{document}
+
+% ================== PAGE DE GARDE ==================
+\begin{titlepage}
+  \centering
+  \vspace*{2cm}
+  {\LARGE \textbf{Rapport du projet Chat}\par}
+  \vspace{0.5cm}
+  {\Large Application de discussion en ligne avec Django\par}
+  \vspace{2cm}
+
+  {\large \textbf{Réalisé par :}\par}
+  \vspace{0.3cm}
+  {\large Ben Issa Ranim\par}
+  {\large DIOUF Aminta\par}
+  {\large FRANCOIS-BATTAGLIA Enzo\par}
+
+  \vfill
+  {\large \today\par}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% ================== INTRODUCTION ==================
+\section{Introduction}
+Dans le cadre de ce projet de développement web, nous avons réalisé une application de discussion en ligne à l’aide du framework \textbf{Django}.
+L’objectif principal est de permettre à des utilisateurs authentifiés d’échanger des messages au sein de \textbf{salons} et de \textbf{canaux (channels)}, tout en respectant une architecture web structurée et sécurisée.
+
+Le système propose plusieurs fonctionnalités clés, notamment :
+\begin{itemize}[leftmargin=*]
+  \item la création de comptes utilisateurs et l’authentification ;
+  \item la gestion des salons et des canaux ;
+  \item l’envoi, la modification et la suppression de messages ;
+  \item des actions de modération (promotion, bannissement, etc.).
+\end{itemize}
+
+Ce projet vise également à appliquer concrètement les connaissances vues en cours : conception de modèles de données, routage, vues, authentification et communication entre frontend et backend.
+
+% ================== CHOIX TECHNIQUES ==================
+\section{Choix techniques et organisation du projet}
+\subsection{Framework et architecture}
+Le framework \textbf{Django} a été choisi pour sa structure claire et ses fonctionnalités intégrées : gestion de l’authentification, routage des URL, ORM (Object-Relational Mapping) et bonnes pratiques de sécurité.
+
+L’architecture repose sur le modèle \textbf{MVT} :
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Model} : structure des données et relations (ORM) ;
+  \item \textbf{View} : logique serveur, traitement des requêtes, réponses JSON ou HTML ;
+  \item \textbf{Template} : rendu HTML côté client.
+\end{itemize}
+
+\subsection{Base de données}
+La base de données est gérée via l’ORM de Django, ce qui évite l’écriture manuelle de requêtes SQL et réduit les risques d’erreurs. Les modèles ont été conçus pour représenter les entités principales : utilisateurs, salons, canaux et messages.
+
+\subsection{Interface utilisateur}
+L’interface repose sur des templates HTML, avec \textbf{Bootstrap} pour obtenir une interface responsive et moderne. Les formulaires Django permettent une validation robuste des entrées (sécurité, contraintes, feedback utilisateur).
+
+% ================== MODELES DE DONNEES ==================
+\section{Modélisation de la base de données}
+La modélisation a été conçue pour représenter simplement et efficacement le fonctionnement d’une application de discussion en ligne.
+
+\subsection{Salon}
+Le \textbf{Salon} correspond à un espace de discussion principal. Il possède :
+\begin{itemize}[leftmargin=*]
+  \item un nom (unique) ;
+  \item un \textit{slug} (identifiant lisible pour les URL) ;
+  \item une description optionnelle ;
+  \item un créateur (administrateur principal).
+\end{itemize}
+
+\subsection{Channel (Canal)}
+Le \textbf{Channel} est associé à un salon et permet d’organiser les discussions par thèmes.
+Chaque canal appartient à un seul salon, et une contrainte d’unicité empêche la duplication de canaux portant le même nom dans un salon.
+
+\subsection{Message}
+Le \textbf{Message} représente les messages envoyés par les utilisateurs :
+\begin{itemize}[leftmargin=*]
+  \item un auteur ;
+  \item un contenu textuel ;
+  \item une date d’envoi ;
+  \item éventuellement un fichier (upload) ;
+  \item rattachement à un salon \textbf{ou} à un channel.
+\end{itemize}
+
+\subsection{Rôles et bannissements (modération)}
+Pour la modération, le projet gère :
+\begin{itemize}[leftmargin=*]
+  \item des rôles (ex. modérateur) via un modèle de liaison (\texttt{SalonRole}) ;
+  \item des bannissements via un modèle dédié (\texttt{Ban}) indiquant l’utilisateur, le salon, l’état actif et la raison.
+\end{itemize}
+
+% ================== AUTH ==================
+\section{Gestion de l’authentification et des utilisateurs}
+L’authentification utilise le système intégré de Django :
+\begin{itemize}[leftmargin=*]
+  \item Inscription (création de compte) ;
+  \item Connexion / Déconnexion ;
+  \item Accès protégé aux salons et canaux via le décorateur \texttt{@login\_required}.
+\end{itemize}
+
+\subsection{Redirection \texttt{login\_required}}
+Pour éviter les erreurs de redirection vers \texttt{/accounts/login/}, une configuration \texttt{LOGIN\_URL} permet de rediriger vers la route de connexion du projet (ex. \texttt{/connexion/}).
+
+% ================== FRONT/BACK ==================
+\section{Interaction frontend / backend}
+Le backend est géré par Django et le frontend par des templates HTML + Bootstrap.
+
+\subsection{API et requêtes asynchrones}
+Pour offrir une expérience fluide, l’application utilise des requêtes AJAX :
+\begin{itemize}[leftmargin=*]
+  \item affichage des messages (salon / channel) sans rechargement complet ;
+  \item envoi de messages ;
+  \item modification et suppression ;
+  \item actions de modération (ban / unban / promote / demote).
+\end{itemize}
+
+Cette séparation permet de garder une logique serveur claire tout en améliorant l’ergonomie côté client.
+
+% ================== FONCTIONNALITES ==================
+\section{Fonctionnalités principales}
+\subsection{Salons et canaux}
+\begin{itemize}[leftmargin=*]
+  \item Création d’un salon ;
+  \item Suppression d’un salon ;
+  \item Création d’un canal dans un salon ;
+  \item Accès à un canal et affichage des messages associés.
+\end{itemize}
+
+\subsection{Messagerie}
+\begin{itemize}[leftmargin=*]
+  \item Envoi d’un message (texte et/ou fichier) ;
+  \item Affichage chronologique des messages ;
+  \item Édition d’un message (auteur) ;
+  \item Suppression d’un message (auteur et/ou modérateur).
+\end{itemize}
+
+\subsection{Modération}
+\begin{itemize}[leftmargin=*]
+  \item Liste des utilisateurs présents dans un salon ;
+  \item Bannir / débannir un utilisateur avec raison optionnelle ;
+  \item Promouvoir / rétrograder un utilisateur en modérateur ;
+  \item Contrôles côté serveur (permissions) pour sécuriser les actions.
+\end{itemize}
+
+% ================== RESULTATS ==================
+\section{Résultats (captures d’écran)}
+Cette section présente quelques captures illustrant le fonctionnement de l’application.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\linewidth]{images/1.png}
+  \caption{Interface de discussion et actions de modération (ex. suppression/édition).}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\linewidth]{images/2.png}
+  \caption{Fenêtre de modération : liste des utilisateurs et actions (ban/promotion).}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\linewidth]{images/3.png}
+  \caption{Page d’accueil : liste des salons disponibles et accès rapide.}
+\end{figure}
+
+% ================== DIFFICULTES / SOLUTIONS ==================
+\section{Difficultés rencontrées et solutions}
+\subsection{Gestion des permissions de modération}
+Une difficulté fréquente concerne la cohérence des permissions côté client et côté serveur.
+La solution consiste à :
+\begin{itemize}[leftmargin=*]
+  \item centraliser les règles de permissions côté backend (admin/modérateur/auteur) ;
+  \item retourner les informations nécessaires (rôle, ban, etc.) via l’API ;
+  \item afficher/masquer les boutons côté frontend selon ces permissions, tout en gardant la sécurité côté serveur.
+\end{itemize}
+
+\subsection{Redirections d’authentification}
+Les routes de connexion personnalisées (ex. \texttt{/connexion/}) nécessitent une configuration \texttt{LOGIN\_URL} adaptée pour éviter les 404.
+
+% ================== CONCLUSION ==================
+\section{Conclusion}
+Ce projet a permis de concevoir et développer une application de discussion en ligne complète, en appliquant les notions vues en cours sur Django : modèles, vues, routage, authentification et interactions frontend/backend.
+
+Les choix réalisés (architecture salons/canaux, AJAX pour la fluidité, gestion des rôles et du bannissement, Bootstrap pour l’interface) aboutissent à une application fonctionnelle, sécurisée et maintenable.
+
+\end{document}

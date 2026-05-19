@@ -1,0 +1,116 @@
+/* Style de base */
+body {
+    background-color: #f8f9fa;
+    font-family: -apple-system, sans-serif;
+    color: #212529;
+}
+
+/* Navbar en noir */
+.navbar {
+    background-color: #212529 !important;
+    border-bottom: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    color: #ffffff !important;
+    letter-spacing: 0.5px;
+}
+
+/* Les cartes (Salons, Login) */
+.card {
+    border-radius: 12px;
+    background-color: #ffffff;
+    border: 1px solid #eaeaea;
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    border-color: #0d6efd;
+}
+
+/* Titres */
+h1, h2, h3 {
+    letter-spacing: -0.5px;
+}
+
+/* Boutons */
+.btn {
+    border-radius: 8px;
+    padding: 10px 24px;
+    font-weight: 600;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border: none;
+    box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+}
+
+/* Emoji Picker Styles */
+#emojiPicker {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    z-index: 1000;
+    position: relative;
+}
+
+.emoji-option {
+    font-size: 1.2rem;
+    padding: 0.25rem 0.5rem;
+    border: none;
+    background: transparent;
+    transition: background-color 0.2s;
+}
+
+.emoji-option:hover {
+    background-color: #f8f9fa !important;
+    border-radius: 4px;
+}
+
+.emoji-option:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Message Actions */
+.message-actions {
+    display: flex;
+    gap: 0.25rem;
+    opacity: 1; /* Always visible */
+    margin-left: 0.5rem;
+    background-color: #f8f9fa; /* Light background to make buttons visible */
+    padding: 0.125rem;
+    border-radius: 0.25rem;
+}
+
+.message-actions .btn {
+    padding: 0.125rem 0.25rem;
+    font-size: 0.75rem;
+    line-height: 1;
+    border: 1px solid #dee2e6;
+}
+
+/* Message styling */
+.message-item {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    border: 1px solid #e9ecef;
+    border-radius: 0.375rem;
+    transition: border-color 0.2s;
+}
+
+.message-item:hover {
+    border-color: #0d6efd;
+}
+
+/* Zone d'alertes JS */
+#chatAlerts .alert {
+  margin-bottom: 0.5rem;
+}
