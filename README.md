@@ -54,9 +54,13 @@ Accès : [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
 ## 📁 Structure du projet
 projet_chat/
+
 ├── chat/               # Application principale
+
 ├── config/             # Configuration Django
+
 ├── requirements.txt 
+
 └── manage.py
 
 ---
